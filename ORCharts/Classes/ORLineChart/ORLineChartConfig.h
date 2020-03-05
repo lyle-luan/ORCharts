@@ -16,10 +16,16 @@ typedef enum : NSUInteger {
     ORLineChartStyleSlider,
     ORLineChartStyleControl,
 } ORLineChartStyle;
-
+typedef enum : NSUInteger {
+    ORLineChartLeftLblStylePercent, //百分比
+    ORLineChartLeftLblStyleLimit //3度
+} ORLineChartLeftLblStyle;
 @interface ORLineChartConfig : NSObject
 
 @property (nonatomic, assign) ORLineChartStyle style;
+
+@property (nonatomic, assign) ORLineChartLeftLblStyle leftLblStyle;
+
 
 //chartLine,shadowLine width. default 3
 @property (nonatomic, assign) CGFloat chartLineWidth;

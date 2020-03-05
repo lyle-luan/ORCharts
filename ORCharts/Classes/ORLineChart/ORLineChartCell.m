@@ -40,7 +40,7 @@
     
     self.titleLabel = [UILabel new];
     self.titleLabel.textAlignment = NSTextAlignmentCenter;
-    
+    self.titleLabel.numberOfLines = 2;
     self.lineLayer = [CAShapeLayer layer];
     
     [self.contentView.layer addSublayer:self.lineLayer];
@@ -56,7 +56,8 @@
     CGFloat width = self.bounds.size.width;
     
     CGFloat height = [self.titleLabel.attributedText boundingRectWithSize:CGSizeMake(width, CGFLOAT_MAX) options:NSStringDrawingUsesFontLeading context:nil].size.height;
-    self.titleLabel.frame = CGRectMake(0, self.bounds.size.height - height , width, height);
+    
+    self.titleLabel.frame = CGRectMake(0, self.bounds.size.height - height * 2 + 10 , width, height * 2);
 
     UIBezierPath *path = [UIBezierPath bezierPath];
     [path moveToPoint:CGPointMake(width * 0.5, 0)];

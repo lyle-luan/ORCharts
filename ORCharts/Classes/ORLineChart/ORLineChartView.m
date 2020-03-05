@@ -184,6 +184,7 @@
         [collectionView registerClass:[ORLineChartCell class] forCellWithReuseIdentifier:NSStringFromClass([ORLineChartCell class])];
         collectionView.delegate = self;
         collectionView.dataSource = self;
+        collectionView.clipsToBounds = NO;
         collectionView;
     });
     [self addSubview:_collectionView];
@@ -193,6 +194,8 @@
     
     _bottomLineLayer = [CAShapeLayer layer];
     [self.layer addSublayer:_bottomLineLayer];
+    
+    
     
     _gradientLayer = ({
         CAGradientLayer *gradientLayer = [CAGradientLayer layer];
@@ -313,18 +316,20 @@
 }
 
 - (void)_or_layoutSubviews {
-    
+   
     if (self.horizontalDatas.count == 0) {
         return;
     }
     
-    _circleLayer.fillColor = self.backgroundColor.CGColor;
+    _circleLayer.fillColor = _config.chartLineColor.CGColor;//self.backgroundColor.CGColor;
     
     self.collectionView.frame = CGRectMake(_config.leftWidth,
                                            _config.topInset,
                                            self.bounds.size.width - _config.leftWidth,
                                            self.bounds.size.height - _config.topInset - _config.bottomInset);
-        
+    
+    
+    
     _gradientLayer.frame = CGRectMake(0, 0, 0, self.collectionView.bounds.size.height);
     
     CGFloat indecaterHeight = _indicator.bounds.size.height;
@@ -408,7 +413,6 @@
     [points removeObjectAtIndex:0];
     
     _circleLayer.position = [points.lastObject CGPointValue];
-
     UIBezierPath *ainmationPath = [ORChartUtilities or_pathWithPoints:points isCurve:isCurve];
     
     _animationLayer.timeOffset = 0.0;
@@ -420,14 +424,16 @@
     [ainmationPath applyTransform:CGAffineTransformMakeTranslation(0, - indecaterHeight)];
     [_animationLayer removeAnimationForKey:@"or_circleMove"];
     [_animationLayer addAnimation:[self _or_positionAnimationWithPath:ainmationPath.CGPath] forKey:@"or_circleMove"];
-
-    
     if (_defaultSelectIndex == 0 || points.count <= 1) {
         CGPoint fistValue = [points.firstObject CGPointValue];
         _indicator.center = CGPointMake(fistValue.x, fistValue.y - indecaterHeight);
         [self _or_updateIndcaterLineFrame];
     }
     
+//    CGPoint fistValue = [points.firstObject CGPointValue];
+//    _indicator.center = CGPointMake(fistValue.x, fistValue.y - indecaterHeight);
+//    [self _or_updateIndcaterLineFrame];
+
     
     if (_config.animateDuration > 0) {
         [_lineLayer addAnimation:[ORChartUtilities or_strokeAnimationWithDurantion:_config.animateDuration] forKey:nil];
@@ -447,6 +453,10 @@
         _gradientLayer.bounds = CGRectMake(0, 0, maxX * 2, self.collectionView.bounds.size.height);
     }
     
+    //隐藏掉
+    if (_indicator) {
+      //  _indicator.hidden = YES;
+    }
 }
 
 - (CAAnimation *)_or_positionAnimationWithPath:(CGPathRef)path {
@@ -511,14 +521,13 @@
     if (!_dataSource) {
         return;
     }
-    
     _lastIndex = -1;
-    
     NSInteger items = [_dataSource numberOfHorizontalDataOfChartView:self];
     
     [self.horizontalDatas removeAllObjects];
     
     BOOL isIndicator = _config.style == ORLineChartStyleSlider;
+    
     
     [CATransaction begin];
     [CATransaction setDisableActions:YES];
@@ -535,6 +544,7 @@
         [_collectionView reloadData];
         return;
     }
+    
     
     for (int i = 0; i < items; i ++) {
         
@@ -600,7 +610,14 @@
         
         NSString *value = self.lineChartValue.isDecimal ? [NSString stringWithFormat:@"%.2lf", self.lineChartValue.separatedValues[idx].doubleValue] : [NSString stringWithFormat:@"%.0lf", self.lineChartValue.separatedValues[idx].doubleValue];
         
-        obj.attributedText = [[NSAttributedString alloc] initWithString:value attributes:[self.dataSource labelAttrbutesForVerticalOfChartView:self]];
+        NSString *leftStr = @"";
+        if (_config.leftLblStyle == ORLineChartLeftLblStylePercent) {
+          leftStr = [NSString stringWithFormat:@"%lu%%",idx * 25];
+        }else{
+           leftStr = [NSString stringWithFormat:@"%lu%@",idx,KlocalizedString(@"度")];
+        }
+      
+        obj.attributedText = [[NSAttributedString alloc] initWithString:leftStr attributes:[self.dataSource labelAttrbutesForVerticalOfChartView:self]];
     }];
     
     
@@ -630,6 +647,9 @@
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.01 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         [self showDataAtIndex:self.defaultSelectIndex animated:NO];
     });
+  //  dispatch_async(dispatch_get_main_queue(), ^{
+//        [self showDataAtIndex:self.defaultSelectIndex animated:NO];
+//    });
 }
 
 - (void)showDataAtIndex:(NSInteger)index animated:(BOOL)animated {
@@ -645,6 +665,7 @@
         UICollectionViewLayoutAttributes *attr = [_collectionView layoutAttributesForItemAtIndexPath:indexPath];
         
         if (_collectionView.contentSize.width < _collectionView.bounds.size.width) {
+            
             
             CGFloat ratio = attr.frame.origin.x / (_collectionView.contentSize.width - attr.frame.size.width);
             ratio = fmin(fmax(0.0, ratio), 1.0);
@@ -664,7 +685,7 @@
         if (_collectionView.contentSize.width - attr.frame.size.width == 0) {
             return;
         }
-
+        
         CGFloat offset = (attr.center.x - attr.frame.size.width / 2.0) * (_collectionView.contentSize.width  + _collectionView.contentInset.left + _collectionView.contentInset.right - _collectionView.bounds.size.width) / (_collectionView.contentSize.width - attr.frame.size.width)- _collectionView.contentInset.left;
         
         [_collectionView setContentOffset:CGPointMake(offset, 0) animated:animated];
