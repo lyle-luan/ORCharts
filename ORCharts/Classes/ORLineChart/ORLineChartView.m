@@ -614,7 +614,7 @@
         if (_config.leftLblStyle == ORLineChartLeftLblStylePercent) {
           leftStr = [NSString stringWithFormat:@"%lu%%",idx * 25];
         }else{
-           leftStr = [NSString stringWithFormat:@"%lu%@",idx,KlocalizedString(@"度")];
+           leftStr = [NSString stringWithFormat:@"%lu%@",idx,_config.degreeString];
         }
       
         obj.attributedText = [[NSAttributedString alloc] initWithString:leftStr attributes:[self.dataSource labelAttrbutesForVerticalOfChartView:self]];

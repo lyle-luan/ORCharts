@@ -22,6 +22,8 @@ typedef enum : NSUInteger {
 } ORLineChartLeftLblStyle;
 @interface ORLineChartConfig : NSObject
 
+@property (nonatomic, string) NSString *degreeString;
+
 @property (nonatomic, assign) ORLineChartStyle style;
 
 @property (nonatomic, assign) ORLineChartLeftLblStyle leftLblStyle;
